@@ -1,0 +1,17 @@
+{
+    "name": "konnector-dev/pda",
+    "description": "PHP-DynamoDB-Adaptor",
+    "type": "library",
+    "require": {
+        "aws/aws-sdk-php": "^3.130"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.5"
+    },
+    "authors": [
+        {
+            "name": "JD Singh",
+            "email": "jdecode@gmail.com"
+        }
+    ]
+}
