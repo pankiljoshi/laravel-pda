@@ -15,6 +15,9 @@
             "src/"
         ]
     },
+    "scripts": {
+        "tests": "vendor/bin/phpunit"
+    },
     "authors": [
         {
             "name": "JD Singh",
