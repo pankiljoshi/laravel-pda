@@ -12,6 +12,7 @@ class PDATest extends TestCase
     public function setUp():void
     {
         $this->pda = new PDA();
+        $this->pda->createTable();
     }
 
     public function testInsertOneRow(): void
