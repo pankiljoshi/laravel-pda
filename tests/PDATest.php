@@ -5,6 +5,7 @@ namespace Tests\Unit;
 
 use PDA\PDA;
 use PHPUnit\Framework\TestCase;
+use Ramsey\Uuid\Uuid;
 
 class PDATest extends TestCase
 {
@@ -20,14 +21,27 @@ class PDATest extends TestCase
         $this->pda->deleteTables();
     }
 
-    public function testInsertOneRow(): void
+    public function testInsertCategorySuccess(): void
     {
         $this->assertEquals(
-            'success',
+            '',
             $this->pda->insert(
-                'products',
-                ['id', 'name', 'cost', 'color'],
-                [[1, 'apple', 100, 'red']]
+                'categories',
+                ['id', 'name', 'status'],
+                [[Uuid::uuid4()->toString(), 'fruits', 1]]
+            )
+        );
+    }
+
+    public function testInsertCategoryFail(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->assertEquals(
+            '',
+            $this->pda->insert(
+                '',
+                ['id', 'name', 'status'],
+                [[Uuid::uuid4()->toString(), 'fruits', 1]]
             )
         );
     }
