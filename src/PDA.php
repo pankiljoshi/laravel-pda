@@ -109,10 +109,15 @@ class PDA
         }
     }
 
+    private function throwMeBro(string $message = 'Check for missing table name or mismatch of columns/values'):void
+    {
+        throw new \InvalidArgumentException($message);
+    }
+
     public function insert(string $table, array $columns, array $values) :void
     {
         if ($table === '' || !(count($columns) === count($values[0]))) {
-            throw new \InvalidArgumentException('Check for missing table name or mismatch of columns/values');
+            $this->throwMeBro();
         }
 
         $json = json_encode(array_combine($columns, $values[0]));
@@ -126,8 +131,7 @@ class PDA
         try {
             $this->dynamoDb->putItem($params);
         } catch (DynamoDbException $e) {
-            echo "Unable to add item:\n";
-            echo $e->getMessage() . "\n";
+            $this->throwMeBro($e->getMessage());
         }
     }
 }
