@@ -31,27 +31,7 @@ class PDA
             echo $e->getMessage() . "\n";
         }
     }
-    public function insert(string $table, array $columns, array $values) :void
-    {
-        if ($table === '' || !(count($columns) === count($values[0]))) {
-            throw new \InvalidArgumentException('Check for missing table name or mismatch of columns/values');
-        }
 
-        $json = json_encode(array_combine($columns, $values[0]));
-
-        $marshaler = new Marshaler();
-        $params = [
-            'TableName' => $table,
-            'Item' => $marshaler->marshalJson($json)
-        ];
-
-        try {
-            $this->dynamoDb->putItem($params);
-        } catch (DynamoDbException $e) {
-            echo "Unable to add item:\n";
-            echo $e->getMessage() . "\n";
-        }
-    }
     public function createTables(): void
     {
         $sdk = new Sdk([
@@ -123,9 +103,30 @@ class PDA
             $result = $this->dynamoDb->createTable($products);
             echo "\nCreated table: {$products['TableName']}\nStatus: " .
                 $result['TableDescription']['TableStatus'] ."\n";
-
         } catch (DynamoDbException $e) {
             echo "Unable to create table:\n";
+            echo $e->getMessage() . "\n";
+        }
+    }
+
+    public function insert(string $table, array $columns, array $values) :void
+    {
+        if ($table === '' || !(count($columns) === count($values[0]))) {
+            throw new \InvalidArgumentException('Check for missing table name or mismatch of columns/values');
+        }
+
+        $json = json_encode(array_combine($columns, $values[0]));
+
+        $marshaler = new Marshaler();
+        $params = [
+            'TableName' => $table,
+            'Item' => $marshaler->marshalJson($json)
+        ];
+
+        try {
+            $this->dynamoDb->putItem($params);
+        } catch (DynamoDbException $e) {
+            echo "Unable to add item:\n";
             echo $e->getMessage() . "\n";
         }
     }
