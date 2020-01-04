@@ -33,7 +33,7 @@ class PDATest extends TestCase
         );
     }
 
-    public function testInsertCategoryFail(): void
+    public function testInsertCategoryFailEmptyTableName(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->assertEquals(
@@ -41,6 +41,19 @@ class PDATest extends TestCase
             $this->pda->insert(
                 '',
                 ['id', 'name', 'status'],
+                [[Uuid::uuid4()->toString(), 'fruits', 1]]
+            )
+        );
+    }
+
+    public function testInsertCategoryFailMismatchingColumnsValues(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->assertEquals(
+            '',
+            $this->pda->insert(
+                'categories',
+                ['id', 'name'],
                 [[Uuid::uuid4()->toString(), 'fruits', 1]]
             )
         );
