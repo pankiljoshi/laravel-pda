@@ -12,7 +12,12 @@ class PDATest extends TestCase
     public function setUp():void
     {
         $this->pda = new PDA();
-        $this->pda->createTable();
+        $this->pda->createTables();
+    }
+
+    public function tearDown():void
+    {
+        $this->pda->deleteTables();
     }
 
     public function testInsertOneRow(): void

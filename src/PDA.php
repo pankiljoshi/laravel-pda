@@ -8,14 +8,35 @@ use Aws\Sdk;
 
 class PDA
 {
-    public function createTable(): void
+    private $dynamoDb;
+
+    public function deleteTables(): void
+    {
+        $categories = [
+            'TableName' => 'categories'
+        ];
+        $products = [
+            'TableName' => 'products'
+        ];
+
+        try {
+            $this->dynamoDb->deleteTable($categories);
+            echo "\nDeleted table : {$categories['TableName']}\n";
+            $this->dynamoDb->deleteTable($products);
+            echo "\nDeleted table : {$products['TableName']}\n";
+        } catch (DynamoDbException $e) {
+            echo "\nUnable to delete all tables:\n";
+            echo $e->getMessage() . "\n";
+        }
+    }
+    public function createTables(): void
     {
         $sdk = new Sdk([
                            'endpoint'   => 'http://localhost:8000',
                            'region'   => 'ap-south-1',
                            'version'  => 'latest'
                        ]);
-        $dynamodb = $sdk->createDynamoDb();
+        $this->dynamoDb = $sdk->createDynamoDb();
 
         $categories = [
             'TableName' => 'categories',
@@ -73,11 +94,11 @@ class PDA
         ];
 
         try {
-            $result = $dynamodb->createTable($categories);
-            echo 'Created table.  Status: ' .
+            $result = $this->dynamoDb->createTable($categories);
+            echo "\nCreated table: {$categories['TableName']}.\nStatus: " .
                 $result['TableDescription']['TableStatus'] ."\n";
-            $result = $dynamodb->createTable($products);
-            echo 'Created table.  Status: ' .
+            $result = $this->dynamoDb->createTable($products);
+            echo "\nCreated table: {$products['TableName']}.\nStatus: " .
                 $result['TableDescription']['TableStatus'] ."\n";
 
         } catch (DynamoDbException $e) {
