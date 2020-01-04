@@ -3,7 +3,7 @@ namespace PDA;
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
-use Aws\DynamoDb;
+use Aws\DynamoDb\Exception\DynamoDbException;
 use Aws\Sdk;
 
 class PDA
@@ -37,11 +37,11 @@ class PDA
                 [
                     'AttributeName' => 'name',
                     'AttributeType' => 'S'
-                ],
-                [
-                    'AttributeName' => 'active',
-                    'AttributeType' => 'B'
-                ],
+                ]
+            ],
+            'ProvisionedThroughput'=> [
+                'ReadCapacityUnits'=> 2,
+                'WriteCapacityUnits'=> 2
             ]
         ];
         $products = [
@@ -54,7 +54,7 @@ class PDA
                 [
                     'AttributeName' => 'category_id',
                     'KeyType' => 'RANGE'
-                ],
+                ]
             ],
             'AttributeDefinitions' => [
                 [
@@ -64,19 +64,11 @@ class PDA
                 [
                     'AttributeName' => 'category_id',
                     'AttributeType' => 'N'
-                ],
-                [
-                    'AttributeName' => 'name',
-                    'AttributeType' => 'S'
-                ],
-                [
-                    'AttributeName' => 'cost',
-                    'AttributeType' => 'S'
-                ],
-                [
-                    'AttributeName' => 'color',
-                    'AttributeType' => 'S'
-                ],
+                ]
+            ],
+            'ProvisionedThroughput'=> [
+                'ReadCapacityUnits'=> 2,
+                'WriteCapacityUnits'=> 2
             ]
         ];
 
