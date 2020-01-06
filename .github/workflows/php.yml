@@ -10,8 +10,8 @@ jobs:
         ports:
           - 8000:8000
         options: --rm -d
-    steps:
-      - run: ls -al
+      steps:
+        - run: ls -al
 
   build:
     needs: db-setup
