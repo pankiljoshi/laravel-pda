@@ -4,12 +4,11 @@ on: [push]
 
 jobs:
   db-setup:
-    services:
-      dynamo-db:
-        image: docker://amazon/dynamodb-local:latest
-        ports:
-          - 8000:8000
-        options: --rm -d
+    container:
+      image: docker://amazon/dynamodb-local:latest
+      ports:
+        - 8000:8000
+      options: --rm -d
       steps:
         - run: ls -al
 
