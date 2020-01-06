@@ -116,27 +116,29 @@ class PDA
 
     public function insert(string $table, array $columns, array $values) :void
     {
-        if ($table === '' || !(count($columns) === count($values[0]))) {
+        if ($table === '' || !count($columns) || !(count($columns) === count($values[0]))) {
             $this->throwMeBro();
         }
 
-        $json = '{}';
-        try {
-            $json = json_encode(array_combine($columns, $values[0]), JSON_THROW_ON_ERROR, 512);
-        } catch (JsonException $jsonException) {
-            $this->throwMeBro($jsonException->getMessage());
-        }
-
-        $marshaler = new Marshaler();
         $params = [
-            'TableName' => $table,
-            'Item' => $marshaler->marshalJson($json)
-        ];
+            'TableName' => $table
+            ];
+        foreach ($values as $value) {
+            $json = '{}';
+            try {
+                $json = json_encode(array_combine($columns, $value), JSON_THROW_ON_ERROR, 512);
+            } catch (JsonException $jsonException) {
+                $this->throwMeBro($jsonException->getMessage());
+            }
 
-        try {
-            $this->dynamoDb->putItem($params);
-        } catch (DynamoDbException $e) {
-            $this->throwMeBro($e->getMessage());
+            $marshaler = new Marshaler();
+            $params['Item'] = $marshaler->marshalJson($json);
+
+            try {
+                $this->dynamoDb->putItem($params);
+            } catch (DynamoDbException $e) {
+                $this->throwMeBro($e->getMessage());
+            }
         }
     }
 }

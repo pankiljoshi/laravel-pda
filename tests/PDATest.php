@@ -46,7 +46,7 @@ class PDATest extends TestCase
         );
     }
 
-    public function testInsertCategoryFailMismatchingColumnsValues(): void
+    public function testInsertCategoryFailMismatchingColumnsValues1(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->assertEquals(
@@ -85,6 +85,22 @@ class PDATest extends TestCase
         );
     }
 
+    public function testInsertMultipleCategoriesSuccess():void
+    {
+        $this->assertEquals(
+            '',
+            $this->pda->insert(
+                'categories',
+                ['id', 'name', 'status'],
+                [
+                    [Uuid::uuid4()->toString(), 'phones', 0],
+                    [Uuid::uuid4()->toString(), 'fruits', 1],
+                    [Uuid::uuid4()->toString(), 'vegetables', 0],
+                    [Uuid::uuid4()->toString(), 'books', 1]
+                ]
+            )
+        );
+    }
     /*
     public function testSelectAllColumns()
     {
