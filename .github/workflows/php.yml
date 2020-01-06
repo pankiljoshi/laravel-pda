@@ -3,15 +3,15 @@ name: phpunit tests against locally Dockerised DynamoDB endpoint
 on: [push]
 
 jobs:
-  db-setup:
-    container:
-      image: docker://amazon/dynamodb-local:latest
-      ports:
-        - 8000:8000
-      options: --rm -d
-      steps:
-        - run: ls -al
-
+#  db-setup:
+#    container:
+#      image: docker://amazon/dynamodb-local:latest
+#      ports:
+#        - 8000:8000
+#      options: --rm -d
+#      steps:
+#        - run: ls -al
+#
   build:
     needs: db-setup
     runs-on: ubuntu-latest
@@ -27,6 +27,9 @@ jobs:
 
       # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
       # Docs: https://getcomposer.org/doc/articles/scripts.md
+      - name: Run local dynamo-db
+        uses: docker://amazon/dynamodb-local:latest
+        run: docker run --rm -d -p 8000:8000/tcp amazon/dynamodb-local:latest
 
       - name: Run test suite
         run: composer run tests
