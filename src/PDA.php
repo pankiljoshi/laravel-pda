@@ -120,7 +120,12 @@ class PDA
             $this->throwMeBro();
         }
 
-        $json = json_encode(array_combine($columns, $values[0]));
+        $json = '{}';
+        try {
+            $json = json_encode(array_combine($columns, $values[0]), JSON_THROW_ON_ERROR, 512);
+        } catch (JsonException $jsonException) {
+            $this->throwMeBro($jsonException->getMessage());
+        }
 
         $marshaler = new Marshaler();
         $params = [
