@@ -27,8 +27,8 @@ jobs:
 
       # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
       # Docs: https://getcomposer.org/doc/articles/scripts.md
+      - uses: docker://amazon/dynamodb-local:latest
       - name: Run local dynamo-db
-        uses: docker://amazon/dynamodb-local:latest
         run: docker run --rm -d -p 8000:8000/tcp amazon/dynamodb-local:latest
 
       - name: Run test suite
