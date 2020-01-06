@@ -3,11 +3,17 @@ name: phpunit tests against locally Dockerised DynamoDB endpoint
 on: [push]
 
 jobs:
+  db-setup:
+    container:
+      image: docker://amazon/dynamodb-local:latest
+      ports:
+        - 8000
+
   build:
+    needs: db-setup
     runs-on: ubuntu-latest
 
     steps:
-      - uses: docker://amazon/dynamodb-local:latest
       - uses: actions/checkout@v1
 
       - name: Validate composer.json and composer.lock
