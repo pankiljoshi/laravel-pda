@@ -5,11 +5,9 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: amazon/dynamodb-local:latest
-      ports: 8000:8000
 
     steps:
+      - uses: docker://amazon/dynamodb-local:latest
       - uses: actions/checkout@v1
 
       - name: Validate composer.json and composer.lock
