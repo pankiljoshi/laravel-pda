@@ -1,4 +1,4 @@
-name: phpunit tests against locally Dockerised DynamoDB endpoint
+name: DynamoDB containerised unit testing
 
 on: [push]
 
