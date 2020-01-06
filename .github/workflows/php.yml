@@ -13,7 +13,7 @@ jobs:
 #        - run: ls -al
 #
   build:
-    needs: db-setup
+#    needs: db-setup
     runs-on: ubuntu-latest
 
     steps:
