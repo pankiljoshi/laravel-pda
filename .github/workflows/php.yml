@@ -1,4 +1,4 @@
-name: PHP Composer
+name: phpunit tests against locally Dockerised DynamoDB endpoint
 
 on: [push]
 
