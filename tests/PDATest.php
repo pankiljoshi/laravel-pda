@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use Aws\DynamoDb\Exception\DynamoDbException;
+use Aws\Sdk;
 use PDA\PDA;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
@@ -10,15 +12,113 @@ use Ramsey\Uuid\Uuid;
 class PDATest extends TestCase
 {
     private $pda;
+    private $dynamoDb;
+
     public function setUp():void
     {
-        $this->pda = new PDA();
-        $this->pda->createTables();
+        $this->dynamoDb = (new Sdk([
+                                   'endpoint'   => 'http://localhost:8000',
+                                   'region'   => 'ap-south-1',
+                                   'version'  => 'latest'
+                               ]))->createDynamoDb();
+        $this->createTables();
+        echo "\n";
+        $this->pda = new PDA($this->dynamoDb);
     }
 
     public function tearDown():void
     {
-        $this->pda->deleteTables();
+        $this->deleteTables();
+        echo "\n";
+    }
+
+    public function createTables(): void
+    {
+
+        $categories = [
+            'TableName' => 'categories',
+            'KeySchema' => [
+                [
+                    'AttributeName' => 'id',
+                    'KeyType' => 'HASH'
+                ],
+                [
+                    'AttributeName' => 'name',
+                    'KeyType' => 'RANGE'
+                ],
+            ],
+            'AttributeDefinitions' => [
+                [
+                    'AttributeName' => 'id',
+                    'AttributeType' => 'S'
+                ],
+                [
+                    'AttributeName' => 'name',
+                    'AttributeType' => 'S'
+                ]
+            ],
+            'ProvisionedThroughput'=> [
+                'ReadCapacityUnits'=> 2,
+                'WriteCapacityUnits'=> 2
+            ]
+        ];
+        $products = [
+            'TableName' => 'products',
+            'KeySchema' => [
+                [
+                    'AttributeName' => 'id',
+                    'KeyType' => 'HASH'
+                ],
+                [
+                    'AttributeName' => 'category_id',
+                    'KeyType' => 'RANGE'
+                ]
+            ],
+            'AttributeDefinitions' => [
+                [
+                    'AttributeName' => 'id',
+                    'AttributeType' => 'N'
+                ],
+                [
+                    'AttributeName' => 'category_id',
+                    'AttributeType' => 'N'
+                ]
+            ],
+            'ProvisionedThroughput'=> [
+                'ReadCapacityUnits'=> 2,
+                'WriteCapacityUnits'=> 2
+            ]
+        ];
+
+        try {
+            $result = $this->dynamoDb->createTable($categories);
+            echo "\nCreated table: {$categories['TableName']}";
+            $result = $this->dynamoDb->createTable($products);
+            echo "\nCreated table: {$products['TableName']}";
+        } catch (DynamoDbException $DynamoDbException) {
+            echo "\nUnable to create tables";
+            echo $DynamoDbException->getMessage() . "\n";
+        }
+    }
+
+    public function deleteTables(): void
+    {
+        $categories = [
+            'TableName' => 'categories'
+        ];
+        $products = [
+            'TableName' => 'products'
+        ];
+
+        try {
+            $this->dynamoDb->deleteTable($categories);
+            echo "\nDeleted table : {$categories['TableName']}";
+            $this->dynamoDb->deleteTable($products);
+            echo "\nDeleted table : {$products['TableName']}";
+        } catch (DynamoDbException $e) {
+            echo "\nUnable to delete all tables";
+            echo $e->getMessage() . "\n";
+        }
     }
 
     public function testInsertCategorySuccess(): void
