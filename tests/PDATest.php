@@ -121,14 +121,41 @@ class PDATest extends TestCase
         }
     }
 
-    public function testInsertCategorySuccess(): void
+    public function insertCategorySuccessData(): array
+    {
+        return [
+            [
+                'categories',
+                ['id', 'name', 'status'],
+                [[Uuid::uuid4()->toString(), 'fruits', 1]]
+            ],
+            [
+                'categories',
+                ['id', 'name', 'status'],
+                [
+                    [Uuid::uuid4()->toString(), 'phones', 0],
+                    [Uuid::uuid4()->toString(), 'fruits', 1],
+                    [Uuid::uuid4()->toString(), 'vegetables', 0],
+                    [Uuid::uuid4()->toString(), 'books', 1]
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * @dataProvider insertCategorySuccessData
+     * @param String $table
+     * @param Array $columns
+     * @param Array $values
+     */
+    public function testInsertCategorySuccess($table, $columns, $values): void
     {
         $this->assertEquals(
             '',
             $this->pda->insert(
-                'categories',
-                ['id', 'name', 'status'],
-                [[Uuid::uuid4()->toString(), 'fruits', 1]]
+                $table,
+                $columns,
+                $values
             )
         );
     }
@@ -140,13 +167,28 @@ class PDATest extends TestCase
                 '',
                 ['id', 'name', 'status'],
                 [[Uuid::uuid4()->toString(), 'fruits', 1]]
+            ],
+            [
+                'categories',
+                ['id', 'name'],
+                [[Uuid::uuid4()->toString(), 'fruits', 1]]
+            ],
+            [
+                'categories',
+                ['id', 'name', 'status'],
+                [[Uuid::uuid4()->toString(), 'fruits']]
+            ],
+            [
+                'categories',
+                ['id', 'name', 'status'],
+                [[Uuid::uuid4()->toString(), 1, 1]]
             ]
         ];
     }
 
     /**
      * @dataProvider insertCategoryFailingData
-     * @param string $table
+     * @param String $table
      * @param Array $columns
      * @param Array $values
      */
@@ -159,61 +201,6 @@ class PDATest extends TestCase
         );
     }
 
-    public function testInsertCategoryFailMismatchingColumnsValues1(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->assertEquals(
-            '',
-            $this->pda->insert(
-                'categories',
-                ['id', 'name'],
-                [[Uuid::uuid4()->toString(), 'fruits', 1]]
-            )
-        );
-    }
-
-    public function testInsertCategoryFailMismatchingColumnsValues2(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->assertEquals(
-            '',
-            $this->pda->insert(
-                'categories',
-                ['id', 'name', 'status'],
-                [[Uuid::uuid4()->toString(), 'fruits']]
-            )
-        );
-    }
-
-    public function testInsertCategoryFailMismatchingColumnsValues3(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->assertEquals(
-            '',
-            $this->pda->insert(
-                'categories',
-                ['id', 'name', 'status'],
-                [[Uuid::uuid4()->toString(), 1, 1]]
-            )
-        );
-    }
-
-    public function testInsertMultipleCategoriesSuccess():void
-    {
-        $this->assertEquals(
-            '',
-            $this->pda->insert(
-                'categories',
-                ['id', 'name', 'status'],
-                [
-                    [Uuid::uuid4()->toString(), 'phones', 0],
-                    [Uuid::uuid4()->toString(), 'fruits', 1],
-                    [Uuid::uuid4()->toString(), 'vegetables', 0],
-                    [Uuid::uuid4()->toString(), 'books', 1]
-                ]
-            )
-        );
-    }
     /*
     public function testSelectAllColumns()
     {
