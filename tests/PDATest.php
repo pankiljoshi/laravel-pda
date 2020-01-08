@@ -133,16 +133,29 @@ class PDATest extends TestCase
         );
     }
 
-    public function testInsertCategoryFailEmptyTableName(): void
+    public function insertCategoryFailingData(): array
+    {
+        return [
+            [
+                '',
+                ['id', 'name', 'status'],
+                [[Uuid::uuid4()->toString(), 'fruits', 1]]
+            ]
+        ];
+    }
+
+    /**
+     * @dataProvider insertCategoryFailingData
+     * @param string $table
+     * @param Array $columns
+     * @param Array $values
+     */
+    public function testInsertCategoryFailEmptyTableName($table, $columns, $values): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->assertEquals(
             '',
-            $this->pda->insert(
-                '',
-                ['id', 'name', 'status'],
-                [[Uuid::uuid4()->toString(), 'fruits', 1]]
-            )
+            $this->pda->insert($table, $columns, $values)
         );
     }
 
