@@ -15,7 +15,7 @@ class PDA
     /**
      * @var DynamoDbClient
      */
-    private $dynamoDb;
+    private DynamoDbClient $dynamoDb;
 
     public function __construct(DynamoDbClient $dynamoDb)
     {
