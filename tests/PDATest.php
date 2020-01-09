@@ -192,7 +192,7 @@ class PDATest extends TestCase
      * @param Array $columns
      * @param Array $values
      */
-    public function testInsertCategoryFailEmptyTableName($table, $columns, $values): void
+    public function testInsertCategoryFailing($table, $columns, $values): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->assertEquals(
