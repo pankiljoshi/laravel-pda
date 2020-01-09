@@ -319,21 +319,5 @@ class PDATest extends TestCase
             $pda->select('products', [], [], [], [], [], [], ["categories", "category_id"])
         );
     }
-
-    public function testInsertMultipleRows()
-    {
-        $pda = new PDA();
-        $this->assertEquals(
-            'INSERT INTO products("id", "name", "cost", "color") VALUES (1, "apple", 100, "red"), (2, "orange", 50, "orange")',
-            $pda->insert(
-                'products',
-                ["id", "name", "cost", "color"],
-                [
-                    [1, "apple", 100, "red"],
-                    [2, "orange", 50, "orange"]
-                ]
-            )
-        );
-    }
     */
 }
