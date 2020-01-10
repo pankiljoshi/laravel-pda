@@ -15,7 +15,7 @@ class PDATest extends TestCase
     private PDA $pda;
     private DynamoDbClient $dynamoDb;
 
-    private static array $inserted_ids = [];
+    private array $inserted_ids = [];
 
     public function setUp():void
     {
@@ -147,12 +147,15 @@ class PDATest extends TestCase
 
     /**
      * @dataProvider insertCategorySuccessData
-     * @param String $table
-     * @param Array $columns
-     * @param Array $values
+     * @param string $table
+     * @param array $columns
+     * @param array $values
      */
-    public function testInsertCategorySuccess($table, $columns, $values): void
+    public function testInsertCategorySuccess(string $table, array $columns, array $values): void
     {
+        foreach ($values as $value) {
+            $this->inserted_ids[] = $value[0];
+        }
         $this->assertEquals(
             '',
             $this->pda->insert(
@@ -191,11 +194,12 @@ class PDATest extends TestCase
 
     /**
      * @dataProvider insertCategoryFailingData
-     * @param String $table
-     * @param Array $columns
-     * @param Array $values
+     * @param string $table
+     * @param array $columns
+     * @param array $values
+     * @depends testInsertCategorySuccess
      */
-    public function testInsertCategoryFailing($table, $columns, $values): void
+    public function testInsertCategoryFailing(string $table, array $columns, array $values): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->assertEquals(
@@ -218,14 +222,24 @@ class PDATest extends TestCase
 
     /**
      * @dataProvider selectCategorySuccessData
-     * @param String $table
-     * @param Array $columns
-     * @param Array $values
+     * @param string $table
+     * @param array $columns
+     * @param array $values
      */
-    public function testSelectAllColumnsSuccess($table, $columns, $values):void
+    public function testSelectAllColumnsSuccess(string $table, array $columns, array $values):void
     {
+        $index = 0;
+        $select_output = [];
+        if (count($columns) && (count($columns) === count($values[0]))) {
+            foreach ($values as $value) {
+                $select_output[$index][$columns[$index]] = $value[$index];
+            }
+        }
+        print_r($select_output);
         $this->assertEquals(
-            '',
+            [
+                $select_output
+            ],
             $this->pda->select($table)
         );
     }
