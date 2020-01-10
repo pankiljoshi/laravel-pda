@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use Aws\DynamoDb\DynamoDbClient;
 use Aws\DynamoDb\Exception\DynamoDbException;
 use Aws\Sdk;
 use PDA\PDA;
@@ -11,8 +12,10 @@ use Ramsey\Uuid\Uuid;
 
 class PDATest extends TestCase
 {
-    private $pda;
-    private $dynamoDb;
+    private PDA $pda;
+    private DynamoDbClient $dynamoDb;
+
+    private static array $inserted_ids = [];
 
     public function setUp():void
     {
@@ -201,15 +204,33 @@ class PDATest extends TestCase
         );
     }
 
-    /*
-    public function testSelectAllColumns()
+
+    public function selectCategorySuccessData(): array
     {
-        $pda = new PDA();
+        return [
+            [
+                'categories',
+                ['id', 'name', 'status'],
+                [[Uuid::uuid4()->toString(), 'fruits', 1]]
+            ]
+        ];
+    }
+
+    /**
+     * @dataProvider selectCategorySuccessData
+     * @param String $table
+     * @param Array $columns
+     * @param Array $values
+     */
+    public function testSelectAllColumnsSuccess($table, $columns, $values):void
+    {
         $this->assertEquals(
-            'SELECT * FROM products',
-            $pda->select('products')
+            '',
+            $this->pda->select($table)
         );
     }
+
+    /*
 
     public function testSelectSpecificColumns()
     {
