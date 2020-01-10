@@ -55,4 +55,12 @@ class PDA
             }
         }
     }
+
+    public function select(string $table, array $columns = [], array $values = []) :void
+    {
+        if ($table === '') {
+            $this->throwMeBro();
+        }
+
+    }
 }
