@@ -235,7 +235,7 @@ class PDATest extends TestCase
                 $select_output[$index][$columns[$index]] = $value[$index];
             }
         }
-        print_r($select_output);
+        
         $this->assertEquals(
             [
                 $select_output
