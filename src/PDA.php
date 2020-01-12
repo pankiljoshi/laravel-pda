@@ -61,6 +61,23 @@ class PDA
         if ($table === '') {
             $this->throwMeBro();
         }
+        $marshaler = new Marshaler();
+
+        $params = [
+            'TableName' => $table,
+            'ProjectionExpression' => implode(', ', $columns)
+        ];
+
+        try {
+            $result = $this->dynamodb->scan($params);
+
+            foreach ($result['Items'] as $item) {
+                $category = $marshaler->unmarshalItem($item);
+                print_r($category);
+            }
+        } catch (DynamoDbException $dynamoDbException) {
+            $this->throwMeBro($dynamoDbException->getMessage());
+        }
 
     }
 }

@@ -197,7 +197,6 @@ class PDATest extends TestCase
      * @param string $table
      * @param array $columns
      * @param array $values
-     * @depends testInsertCategorySuccess
      */
     public function testInsertCategoryFailing(string $table, array $columns, array $values): void
     {
@@ -216,6 +215,16 @@ class PDATest extends TestCase
                 'categories',
                 ['id', 'name', 'status'],
                 [[Uuid::uuid4()->toString(), 'fruits', 1]]
+            ],
+            [
+                'categories',
+                ['id', 'name', 'status'],
+                [
+                    [Uuid::uuid4()->toString(), 'phones', 0],
+                    [Uuid::uuid4()->toString(), 'fruits', 1],
+                    [Uuid::uuid4()->toString(), 'vegetables', 0],
+                    [Uuid::uuid4()->toString(), 'books', 1]
+                ]
             ]
         ];
     }
@@ -228,6 +237,7 @@ class PDATest extends TestCase
      */
     public function testSelectAllColumnsSuccess(string $table, array $columns, array $values):void
     {
+        /*
         $index = 0;
         $select_output = [];
         if (count($columns) && (count($columns) === count($values[0]))) {
@@ -235,12 +245,12 @@ class PDATest extends TestCase
                 $select_output[$index][$columns[$index]] = $value[$index];
             }
         }
-        
-        $this->assertEquals(
-            [
-                $select_output
-            ],
-            $this->pda->select($table)
+        */
+        $this->testInsertCategorySuccess($this->insertCategorySuccessData()[0][0], $this->insertCategorySuccessData()[0][1], $this->insertCategorySuccessData()[0][2]);
+        $select_output = '';
+        $this->assertNotEquals(
+            $select_output,
+            $this->pda->select($table, $columns)
         );
     }
 
