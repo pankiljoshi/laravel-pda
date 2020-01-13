@@ -69,11 +69,10 @@ class PDA
         ];
 
         try {
-            $result = $this->dynamodb->scan($params);
+            $result = $this->dynamoDb->scan($params);
 
             foreach ($result['Items'] as $item) {
                 $category = $marshaler->unmarshalItem($item);
-                print_r($category);
             }
         } catch (DynamoDbException $dynamoDbException) {
             $this->throwMeBro($dynamoDbException->getMessage());
