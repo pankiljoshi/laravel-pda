@@ -94,9 +94,9 @@ class PDATest extends TestCase
         ];
 
         try {
-            $result = $this->dynamoDb->createTable($categories);
+            $this->dynamoDb->createTable($categories);
             echo "\nCreated table: {$categories['TableName']}";
-            $result = $this->dynamoDb->createTable($products);
+            $this->dynamoDb->createTable($products);
             echo "\nCreated table: {$products['TableName']}";
         } catch (DynamoDbException $DynamoDbException) {
             echo "\nUnable to create tables";
@@ -230,23 +230,14 @@ class PDATest extends TestCase
     }
 
     /**
-     * @dataProvider selectCategorySuccessData
+     * @dataProvider insertCategorySuccessData
      * @param string $table
      * @param array $columns
      * @param array $values
      */
     public function testSelectAllColumnsSuccess(string $table, array $columns, array $values):void
     {
-        /*
-        $index = 0;
-        $select_output = [];
-        if (count($columns) && (count($columns) === count($values[0]))) {
-            foreach ($values as $value) {
-                $select_output[$index][$columns[$index]] = $value[$index];
-            }
-        }
-        */
-        $this->testInsertCategorySuccess($this->insertCategorySuccessData()[0][0], $this->insertCategorySuccessData()[0][1], $this->insertCategorySuccessData()[0][2]);
+        //$this->testInsertCategorySuccess($this->insertCategorySuccessData()[0][0], $this->insertCategorySuccessData()[0][1], $this->insertCategorySuccessData()[0][2]);
         $select_output = '';
         $this->assertNotEquals(
             $select_output,

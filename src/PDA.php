@@ -56,24 +56,30 @@ class PDA
         }
     }
 
-    public function select(string $table, array $columns = [], array $values = []) :void
+    public function select(string $table, array $columns = [], array $values = [])
     {
         if ($table === '') {
             $this->throwMeBro();
         }
         $marshaler = new Marshaler();
 
+        $expression_columns = [];
+        foreach($columns as $column) {
+            $expression_columns["#_$column"] = $column;
+        };
         $params = [
             'TableName' => $table,
-            'ProjectionExpression' => implode(', ', $columns)
+            'ProjectionExpression' => implode(', ', array_keys($expression_columns)),
+            'ExpressionAttributeNames' => $expression_columns
         ];
 
         try {
             $result = $this->dynamoDb->scan($params);
-
+            $categories = [];
             foreach ($result['Items'] as $item) {
-                $category = $marshaler->unmarshalItem($item);
+                $categories[] = $marshaler->unmarshalItem($item);
             }
+            return json_encode($categories);
         } catch (DynamoDbException $dynamoDbException) {
             $this->throwMeBro($dynamoDbException->getMessage());
         }
