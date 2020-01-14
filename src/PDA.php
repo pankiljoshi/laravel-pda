@@ -79,7 +79,7 @@ class PDA
             foreach ($result['Items'] as $item) {
                 $categories[] = $marshaler->unmarshalItem($item);
             }
-            return json_encode($categories);
+            return json_encode($categories, JSON_THROW_ON_ERROR, 512);
         } catch (DynamoDbException $dynamoDbException) {
             $this->throwMeBro($dynamoDbException->getMessage());
         }
