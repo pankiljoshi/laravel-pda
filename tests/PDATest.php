@@ -237,10 +237,13 @@ class PDATest extends TestCase
      */
     public function testSelectAllColumnsSuccess(string $table, array $columns, array $values):void
     {
-        //$this->testInsertCategorySuccess($this->insertCategorySuccessData()[0][0], $this->insertCategorySuccessData()[0][1], $this->insertCategorySuccessData()[0][2]);
-        $select_output = '';
+        $total_categories = 0;
+        foreach($this->insertCategorySuccessData() as $categoryData) {
+            $total_categories++;
+            $this->testInsertCategorySuccess($categoryData[0], $categoryData[1], $categoryData[2]);
+        }
         $this->assertNotEquals(
-            $select_output,
+            $total_categories,
             $this->pda->select($table, $columns)
         );
     }

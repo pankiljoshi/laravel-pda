@@ -16,12 +16,21 @@ class PDA
      * @var DynamoDbClient
      */
     private DynamoDbClient $dynamoDb;
+    private array $reservedKeywords = [
+        'name', 'status'
+    ];
 
     public function __construct(DynamoDbClient $dynamoDb)
     {
         $this->dynamoDb = $dynamoDb;
     }
 
+    private function isReservedKeyword(string $keyword) :bool {
+        if(in_array($keyword, $this->reservedKeywords, false)) {
+            return true;
+        }
+        return false;
+    }
 
     private function throwMeBro(string $message = 'Check for missing table name or mismatch of columns/values'):void
     {
@@ -50,7 +59,7 @@ class PDA
 
             try {
                 $this->dynamoDb->putItem($params);
-            } catch (DynamoDbException $DynamoDbException) {
+             } catch (DynamoDbException $DynamoDbException) {
                 $this->throwMeBro($DynamoDbException->getMessage());
             }
         }
@@ -63,14 +72,20 @@ class PDA
         }
         $marshaler = new Marshaler();
 
-        $expression_columns = [];
+        $aliases = [];
+        $select = [];
         foreach($columns as $column) {
-            $expression_columns["#_$column"] = $column;
-        };
+            if($this->isReservedKeyword($column)) {
+                $aliases["#$column"] = $column;
+                $select["#$column"] = $column;
+                continue;
+            }
+            $select[$column] = $column;
+        }
         $params = [
             'TableName' => $table,
-            'ProjectionExpression' => implode(', ', array_keys($expression_columns)),
-            'ExpressionAttributeNames' => $expression_columns
+            'ProjectionExpression' => implode(', ', array_keys($select)),
+            'ExpressionAttributeNames' => $aliases
         ];
 
         try {
