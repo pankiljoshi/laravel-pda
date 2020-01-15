@@ -92,8 +92,15 @@ class PDA
             $result = $this->dynamoDb->scan($params);
             $categories = [];
             foreach ($result['Items'] as $item) {
-                $categories[] = $marshaler->unmarshalItem($item);
+                $category = $marshaler->unmarshalItem($item);
+                ksort($category);
+                $categories[] = $category;
             }
+            uasort($categories, static function ($a, $b) {
+                return $a['name'] <=> $b['name'];
+            });
+            $categories = array_values($categories);
+            sort($categories);
             return json_encode($categories, JSON_THROW_ON_ERROR, 512);
         } catch (DynamoDbException $dynamoDbException) {
             $this->throwMeBro($dynamoDbException->getMessage());

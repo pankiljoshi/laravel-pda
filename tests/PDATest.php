@@ -230,20 +230,25 @@ class PDATest extends TestCase
     }
 
     /**
-     * @dataProvider insertCategorySuccessData
+     * @dataProvider selectCategorySuccessData
      * @param string $table
      * @param array $columns
      * @param array $values
      */
     public function testSelectAllColumnsSuccess(string $table, array $columns, array $values):void
     {
-        $total_categories = 0;
-        foreach($this->insertCategorySuccessData() as $categoryData) {
-            $total_categories++;
-            $this->testInsertCategorySuccess($categoryData[0], $categoryData[1], $categoryData[2]);
+        $this->testInsertCategorySuccess($table, $columns, $values);
+        $array_values = [];
+        foreach($values as $value) {
+            $array_values[] = array_combine($columns, $value);
         }
-        $this->assertNotEquals(
-            $total_categories,
+        uasort($array_values, static function ($a, $b) {
+            return $a['name'] <=> $b['name'];
+        });
+        $array_values = array_values($array_values);
+        sort($array_values);
+        $this->assertEquals(
+            json_encode($array_values, JSON_THROW_ON_ERROR, 512),
             $this->pda->select($table, $columns)
         );
     }
