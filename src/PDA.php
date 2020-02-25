@@ -45,8 +45,10 @@ class PDA
         $params = [
             'TableName' => $table
         ];
+
         foreach ($values as $value) {
             $json = '{}';
+
             try {
                 $json 
                     = json_encode(array_combine($columns, $value), JSON_THROW_ON_ERROR);
@@ -70,18 +72,22 @@ class PDA
         if ($table === '') {
             $this->throwMeBro();
         }
+
         $marshaler = new Marshaler();
 
         $aliases = [];
         $select = [];
+        
         foreach ($columns as $column) {
             if ($this->_isReservedKeyword($column)) {
                 $aliases["#$column"] = $column;
                 $select["#$column"] = $column;
                 continue;
             }
+
             $select[$column] = $column;
         }
+
         $params = [
             'TableName' => $table,
             'ProjectionExpression' => implode(', ', array_keys($select)),
@@ -91,23 +97,27 @@ class PDA
         try {
             $result = $this->_dynamoDb->scan($params);
             $responseArray = [];
+
             foreach ($result['Items'] as $item) {
                 $responseArrayItem = $marshaler->unmarshalItem($item);
                 ksort($responseArrayItem);
                 $responseArray[] = $responseArrayItem;
             }
+
             uasort(
                 $responseArray, 
                 static function ($a, $b) {
                     return $a['name'] <=> $b['name'];  
                 }
             );
+
             $responseArray = array_values($responseArray);
+
             sort($responseArray);
+
             return json_encode($responseArray, JSON_THROW_ON_ERROR, 512);
         } catch (DynamoDbException $dynamoDbException) {
             $this->throwMeBro($dynamoDbException->getMessage());
         }
-
     }
 }
