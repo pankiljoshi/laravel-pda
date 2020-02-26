@@ -17,6 +17,10 @@ class PDA
     private array $_reservedKeywords = [
         'name', 'status'
     ];
+    private array $_key;
+    private string $_expressionString;
+    private array $_expressionAttributeValuesArray = [];
+    private array $_expressionAttributeNames;
 
     public function __construct(DynamoDbClient $dynamoDb)
     {
@@ -119,5 +123,120 @@ class PDA
         } catch (DynamoDbException $dynamoDbException) {
             $this->throwMeBro($dynamoDbException->getMessage());
         }
+    }
+
+    public function update(string $table): string
+    {
+        if ($table === '') {
+            $this->throwMeBro();
+        }
+
+        $updateExpression = $this->_getUpdateExpressionString();
+
+        var_dump($this->_getKey());
+        var_dump($updateExpression);
+        var_dump($this->_getExpressionAttributeValues());
+        var_dump($this->_expressionAttributeNames);
+        exit;
+        $params = [
+            'TableName' => $table,
+            'Key' => $this->_getKey(),
+            'UpdateExpression' => $updateExpression,
+            'ExpressionAttributeValues'=> $this->_getExpressionAttributeValues(),
+            'ExpressionAttributeNames' => $this->_expressionAttributeNames,
+            'ReturnValues' => 'UPDATED_NEW'
+        ];
+        try {
+            $response = $this->_dynamoDb->updateItem($params);
+
+            return json_encode($response, JSON_THROW_ON_ERROR, 512);
+        } catch (DynamoDbException $dynamoDbException) {
+            $this->throwMeBro($dynamoDbException->getMessage());
+        }
+    }
+
+    public function key(array $keyArray): PDA
+    {
+        $marshaler = new Marshaler();
+        $keyJson = '{}';
+
+        try {
+            $keyJson = json_encode($keyArray, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $jsonException) {
+            $this->throwMeBro($jsonException->getMessage());
+        }
+
+        $this->_key = $marshaler->marshalJson($keyJson);
+
+        return $this;
+    }
+
+    private function _getKey(): array
+    {
+        return $this->_key;
+    }
+
+    private function _getExpressionAttributeValues(): array
+    {
+        return $this->_expressionAttributeValuesArray;
+    }
+
+    private function _getUpdateExpressionString(): string
+    {
+        return $this->_expressionString;
+    }
+
+    private function _setExpressionAttributeValueItem(string $key, $value = null): void
+    {
+        $item = [];
+        $item[$this->_renameReservedKeywords($key, true)] = $value;
+        $marshaler = new Marshaler();
+        $itemJson = '{}';
+
+        try {
+            $itemJson = json_encode($item, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $jsonException) {
+            $this->throwMeBro($jsonException->getMessage());
+        }
+
+        $marshaledItem = $marshaler->marshalJson($itemJson);
+
+        $this->_expressionAttributeValuesArray 
+            = array_merge($this->_expressionAttributeValuesArray, $marshaledItem);
+    }
+
+    public function set(array $dataArray): PDA
+    {
+        $this->_expressionString = 'SET ';
+        $iterationCount = 0;
+
+        foreach ($dataArray as $key => $value) {
+            $this->_setExpressionAttributeValueItem($key, $value);
+
+            $this->_expressionString .= ($iterationCount > 0) ? ', ' : '';
+            $this->_expressionString .= $this->_renameReservedKeywords($key);
+            $this->_expressionString .= ' = ' . $this->_renameReservedKeywords(
+                $key, 
+                true
+            );
+
+            $iterationCount++;
+        }
+
+        return $this;
+    }
+
+    private function _renameReservedKeywords(string $column, $isExpressionAttributeValue = false): string
+    {
+        $alias = '';
+
+        if ($this->_isReservedKeyword($column) && !$isExpressionAttributeValue) {
+            $alias = '#' . $column;
+            $this->_expressionAttributeNames[$alias] = $column;
+        } elseif ($isExpressionAttributeValue) {
+            $alias = ':' . $column;
+        }
+
+        return (empty($alias))? $column : $alias;
     }
 }
