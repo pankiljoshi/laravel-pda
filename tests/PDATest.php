@@ -17,21 +17,21 @@ class PDATest extends TestCase
 
     private array $inserted_ids = [];
 
-    public function setUp():void
+    public function setUp(): void
     {
         $this->dynamoDb = (new Sdk([
-                                   'endpoint'   => 'http://localhost:8000',
-                                   'region'   => 'ap-south-1',
-                                   'version'  => 'latest'
-                               ]))->createDynamoDb();
+            'endpoint' => 'http://localhost:8000',
+            'region' => 'ap-south-1',
+            'version' => 'latest'
+        ]))->createDynamoDb();
         $this->createTables();
         echo "\n";
         $this->pda = new PDA($this->dynamoDb);
     }
 
-    public function tearDown():void
+    public function tearDown(): void
     {
-        // $this->deleteTables();
+        $this->deleteTables();
         echo "\n";
     }
 
@@ -60,9 +60,9 @@ class PDATest extends TestCase
                     'AttributeType' => 'S'
                 ]
             ],
-            'ProvisionedThroughput'=> [
-                'ReadCapacityUnits'=> 2,
-                'WriteCapacityUnits'=> 2
+            'ProvisionedThroughput' => [
+                'ReadCapacityUnits' => 2,
+                'WriteCapacityUnits' => 2
             ]
         ];
         $products = [
@@ -87,9 +87,9 @@ class PDATest extends TestCase
                     'AttributeType' => 'N'
                 ]
             ],
-            'ProvisionedThroughput'=> [
-                'ReadCapacityUnits'=> 2,
-                'WriteCapacityUnits'=> 2
+            'ProvisionedThroughput' => [
+                'ReadCapacityUnits' => 2,
+                'WriteCapacityUnits' => 2
             ]
         ];
 
@@ -235,11 +235,11 @@ class PDATest extends TestCase
      * @param array $columns
      * @param array $values
      */
-    public function testSelectAllColumnsSuccess(string $table, array $columns, array $values):void
+    public function testSelectAllColumnsSuccess(string $table, array $columns, array $values): void
     {
         $this->testInsertCategorySuccess($table, $columns, $values);
         $array_values = [];
-        foreach($values as $value) {
+        foreach ($values as $value) {
             $array_values[] = array_combine($columns, $value);
         }
         uasort($array_values, static function ($a, $b) {
@@ -257,24 +257,6 @@ class PDATest extends TestCase
     {
         $uuids = [Uuid::uuid4()->toString()];
         return [
-            // [
-            //     'categories',
-            //     'insertData' => [
-            //         ['id', 'name', 'status', 'alias'],
-            //         [[$uuids[0], 'fruits', 1, 'fruits']]
-            //     ],
-            //     'updateData' => [
-            //         'key' => [
-            //             'id' => $uuids[0],
-            //             'name' => 'fruits'
-            //         ],
-            //         'data' => [
-            //             'status' => 0,
-            //             'test' => 'fru'
-            //         ]
-                    
-            //     ]
-            // ],
             [
                 'categories',
                 'insertData' => [
@@ -287,12 +269,9 @@ class PDATest extends TestCase
                         'name' => 'fruits'
                     ],
                     'set' => [
-                        'status' => 5
-                    ],
-                    'add' => [
-                        'items' => ['summer' => ['Banana']]
+                        'status' => 5,
+                        'items' => ['summer' => ['Mango', 'Apple', 'Banana']]
                     ]
-                    
                 ]
             ]
         ];
@@ -312,10 +291,48 @@ class PDATest extends TestCase
             '{}', $this->pda
             ->key($updateData['key'])
             ->set($updateData['set'])
-            ->add($updateData['add'])
             ->update($table)
         );
     }
+
+    public function deleteCategorySuccessData(): array
+    {
+        $uuids = [Uuid::uuid4()->toString()];
+        return [
+            [
+                'categories',
+                'insertData' => [
+                    ['id', 'name', 'status', 'alias'],
+                    [[$uuids[0], 'fruits', 1, 'fruits']]
+                ],
+                'deleteData' => [
+                    'key' => [
+                        'id' => $uuids[0],
+                        'name' => 'fruits'
+                    ]
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * @dataProvider deleteCategorySuccessData
+     * @param string $table
+     * @param array $insertData
+     * @param array $deleteData
+     */
+
+    public function testDeleteCategorySuccess(string $table, array $insertData, array $deleteData): void
+    {
+        $this->testInsertCategorySuccess($table, ...$insertData);
+
+        $this->assertEquals(
+            '{}', $this->pda
+            ->key($deleteData['key'])
+            ->delete($table)
+        );
+    }
+
 
     /*
 

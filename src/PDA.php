@@ -20,7 +20,7 @@ class PDA
     private array $_key;
     private string $_expressionString = '';
     private array $_expressionAttributeValuesArray = [];
-    private array $_expressionAttributeNames;
+    private array $_expressionAttributeNames = [];
 
     public function __construct(DynamoDbClient $dynamoDb)
     {
@@ -133,20 +133,18 @@ class PDA
 
         $updateExpression = $this->_getUpdateExpressionString();
 
-        var_dump($this->_getKey());
-        var_dump($updateExpression);
-        var_dump($this->_getExpressionAttributeValues());
-        var_dump($this->_expressionAttributeNames);
-        exit;
-
         $params = [
             'TableName' => $table,
             'Key' => $this->_getKey(),
             'UpdateExpression' => $updateExpression,
             'ExpressionAttributeValues'=> $this->_getExpressionAttributeValues(),
-            'ExpressionAttributeNames' => $this->_expressionAttributeNames,
             'ReturnValues' => 'UPDATED_NEW'
         ];
+
+        if (!empty($this->_expressionAttributeNames)) {
+            $params['ExpressionAttributeNames'] = $this->_expressionAttributeNames;
+        }
+        
         try {
             $response = $this->_dynamoDb->updateItem($params);
 
@@ -228,55 +226,6 @@ class PDA
         return $this;
     }
 
-    public function add(array $dataArray): PDA
-    {
-        $this->_expressionString .= (!empty($this->_expressionString))? ' ': '';
-        $this->_expressionString .= 'add ';
-
-        $iterationCount = 0;
-        $recursiveIteratorIterator = new \RecursiveIteratorIterator(
-            new \RecursiveArrayIterator($dataArray)
-        );
-
-        foreach ($recursiveIteratorIterator as $elementValue) {
-
-            $keys = [];
-
-            foreach (range(0, $recursiveIteratorIterator->getDepth()) as $depth) {
-                $subIterator = $recursiveIteratorIterator->getSubIterator($depth);
-                $nextElementSubIterator = !empty(
-                    $recursiveIteratorIterator->getSubIterator($depth + 1)
-                )? $recursiveIteratorIterator->getSubIterator($depth + 1) : null;
-                $key = $subIterator->key();
-                $value = $subIterator->current();
-
-                if ($recursiveIteratorIterator->getDepth() == $depth) {
-                    if (is_string($key)) {
-                        $this->_setExpressionAttributeValueItem($key, $value);
-                    } else {
-
-                        continue;
-                    }
-                }
-
-                $keys[] = $key;
-            }
-
-            $this->_expressionString .= ($iterationCount > 0) ? ', ' : '';
-            $this->_expressionString 
-                .= (sizeof($keys) > 1)? 
-                join('.', $keys) : $this->_renameReservedKeywords(join('.', $keys));
-            $this->_expressionString .= ' = ' . $this->_renameReservedKeywords(
-                $keys[(sizeof($keys) - 1)],
-                true
-            );
-
-            $iterationCount++;
-        }
-
-        return $this;
-    }
-
     private function _renameReservedKeywords(string $column, $isExpressionAttributeValue = false): string
     {
         $alias = '';
@@ -289,5 +238,26 @@ class PDA
         }
 
         return (empty($alias))? $column : $alias;
+    }
+
+    public function delete(string $table): string
+    {
+        if ($table === '') {
+            $this->throwMeBro();
+        }
+
+        $params = [
+            'TableName' => $table,
+            'Key' => $this->_getKey()
+        ];
+
+        try {
+            $response = $this->_dynamoDb->deleteItem($params);
+            return json_encode($response, JSON_THROW_ON_ERROR, 512);
+        } catch (DynamoDbException $dynamoDbException) {
+            $this->throwMeBro($dynamoDbException->getMessage());
+        }
+
+
     }
 }
