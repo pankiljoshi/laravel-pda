@@ -31,7 +31,7 @@ class PDATest extends TestCase
 
     public function tearDown():void
     {
-        $this->deleteTables();
+        // $this->deleteTables();
         echo "\n";
     }
 
@@ -257,24 +257,24 @@ class PDATest extends TestCase
     {
         $uuids = [Uuid::uuid4()->toString()];
         return [
-            [
-                'categories',
-                'insertData' => [
-                    ['id', 'name', 'status', 'alias'],
-                    [[$uuids[0], 'fruits', 1, 'fruits']]
-                ],
-                'updateData' => [
-                    'key' => [
-                        'id' => $uuids[0],
-                        'name' => 'fruits'
-                    ],
-                    'data' => [
-                        'status' => 0,
-                        'test' => 'fru'
-                    ]
+            // [
+            //     'categories',
+            //     'insertData' => [
+            //         ['id', 'name', 'status', 'alias'],
+            //         [[$uuids[0], 'fruits', 1, 'fruits']]
+            //     ],
+            //     'updateData' => [
+            //         'key' => [
+            //             'id' => $uuids[0],
+            //             'name' => 'fruits'
+            //         ],
+            //         'data' => [
+            //             'status' => 0,
+            //             'test' => 'fru'
+            //         ]
                     
-                ]
-            ],
+            //     ]
+            // ],
             [
                 'categories',
                 'insertData' => [
@@ -286,9 +286,11 @@ class PDATest extends TestCase
                         'id' => $uuids[0],
                         'name' => 'fruits'
                     ],
-                    'data' => [
-                        'status' => 5,
-                        'items' => ['winter' => ['Apple']]
+                    'set' => [
+                        'status' => 5
+                    ],
+                    'add' => [
+                        'items' => ['summer' => ['Banana']]
                     ]
                     
                 ]
@@ -309,7 +311,8 @@ class PDATest extends TestCase
         $this->assertEquals(
             '{}', $this->pda
             ->key($updateData['key'])
-            ->set($updateData['data'])
+            ->set($updateData['set'])
+            ->add($updateData['add'])
             ->update($table)
         );
     }

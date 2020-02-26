@@ -15,10 +15,10 @@ class PDA
      */
     private DynamoDbClient $_dynamoDb;
     private array $_reservedKeywords = [
-        'name', 'status'
+        'name', 'status', 'items'
     ];
     private array $_key;
-    private string $_expressionString;
+    private string $_expressionString = '';
     private array $_expressionAttributeValuesArray = [];
     private array $_expressionAttributeNames;
 
@@ -138,6 +138,7 @@ class PDA
         var_dump($this->_getExpressionAttributeValues());
         var_dump($this->_expressionAttributeNames);
         exit;
+
         $params = [
             'TableName' => $table,
             'Key' => $this->_getKey(),
@@ -207,7 +208,8 @@ class PDA
 
     public function set(array $dataArray): PDA
     {
-        $this->_expressionString = 'SET ';
+        $this->_expressionString .= (!empty($this->_expressionString))? ' ': '';
+        $this->_expressionString .= 'set ';
         $iterationCount = 0;
 
         foreach ($dataArray as $key => $value) {
@@ -217,6 +219,55 @@ class PDA
             $this->_expressionString .= $this->_renameReservedKeywords($key);
             $this->_expressionString .= ' = ' . $this->_renameReservedKeywords(
                 $key, 
+                true
+            );
+
+            $iterationCount++;
+        }
+
+        return $this;
+    }
+
+    public function add(array $dataArray): PDA
+    {
+        $this->_expressionString .= (!empty($this->_expressionString))? ' ': '';
+        $this->_expressionString .= 'add ';
+
+        $iterationCount = 0;
+        $recursiveIteratorIterator = new \RecursiveIteratorIterator(
+            new \RecursiveArrayIterator($dataArray)
+        );
+
+        foreach ($recursiveIteratorIterator as $elementValue) {
+
+            $keys = [];
+
+            foreach (range(0, $recursiveIteratorIterator->getDepth()) as $depth) {
+                $subIterator = $recursiveIteratorIterator->getSubIterator($depth);
+                $nextElementSubIterator = !empty(
+                    $recursiveIteratorIterator->getSubIterator($depth + 1)
+                )? $recursiveIteratorIterator->getSubIterator($depth + 1) : null;
+                $key = $subIterator->key();
+                $value = $subIterator->current();
+
+                if ($recursiveIteratorIterator->getDepth() == $depth) {
+                    if (is_string($key)) {
+                        $this->_setExpressionAttributeValueItem($key, $value);
+                    } else {
+
+                        continue;
+                    }
+                }
+
+                $keys[] = $key;
+            }
+
+            $this->_expressionString .= ($iterationCount > 0) ? ', ' : '';
+            $this->_expressionString 
+                .= (sizeof($keys) > 1)? 
+                join('.', $keys) : $this->_renameReservedKeywords(join('.', $keys));
+            $this->_expressionString .= ' = ' . $this->_renameReservedKeywords(
+                $keys[(sizeof($keys) - 1)],
                 true
             );
 
