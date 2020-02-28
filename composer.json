@@ -1,5 +1,5 @@
 {
-    "name": "konnector-dev/pda",
+    "name": "pankiljoshi/laravel-pda",
     "license": "Apache-2.0",
     "description": "PHP-DynamoDB-Adaptor",
     "type": "library",
